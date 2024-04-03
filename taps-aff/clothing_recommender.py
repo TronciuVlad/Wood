@@ -16,12 +16,15 @@ class ClothingRecommender:
     def fahrenheit_to_celsius(fahrenheit):
         return (fahrenheit - 32) * 5 / 9
 
+    def using_fahrenheit(self, location):
+        return location in self.fahrenheit_cities
+
     def process_csv(self):
         data = self.read_csv()
         for row in data:
             temperature = int(row['temperature'])
-            # Check if the location is in the list of Fahrenheit cities
-            if row['location'] in self.fahrenheit_cities:
+            # Use using_fahrenheit to check if the location uses Fahrenheit
+            if self.using_fahrenheit(row['location']):
                 temperature = self.fahrenheit_to_celsius(temperature)
             row['what_to_wear'] = self.decide_what_to_wear(temperature)
         self.write_csv(data)
