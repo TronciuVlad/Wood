@@ -4,7 +4,22 @@ from clothing_recommender import ClothingRecommender
 import csv
 
 class RecommendationViewer:
+    """
+    A GUI application for viewing, adding, and deleting clothing recommendations based on temperature.
+    
+    Attributes:
+        master (tk.Tk): The root window of the Tkinter application.
+        recommender (ClothingRecommender): An instance of the ClothingRecommender class for processing recommendations.
+    """
+
     def __init__(self, master, recommender):
+        """
+        Initializes the RecommendationViewer GUI application.
+        
+        Args:
+            master (tk.Tk): The root window of the Tkinter application.
+            recommender (ClothingRecommender): An instance of the ClothingRecommender class.
+        """
         self.master = master
         self.recommender = recommender
         master.title("Clothing Recommendations")
@@ -13,6 +28,9 @@ class RecommendationViewer:
         self.load_data()
 
     def setup_widgets(self):
+        """
+        Sets up the GUI widgets including Treeview for recommendations, input fields for adding new cities, and control buttons.
+        """
         # Setup Treeview
         self.tree = ttk.Treeview(self.master)
         self.tree['columns'] = ('location', 'temperature', 'what_to_wear')
@@ -55,6 +73,10 @@ class RecommendationViewer:
         self.delete_button.pack(side=tk.BOTTOM, fill=tk.X)
 
     def add_city(self):
+        """
+        Adds a new city and its temperature to the input CSV file, recalculates recommendations, and refreshes the display.
+        Validates the temperature input and checks for duplicate city entries before adding.
+        """
         city = self.city_entry.get().strip()
         temperature_str = self.temperature_entry.get().strip()
         try:
@@ -78,7 +100,15 @@ class RecommendationViewer:
             messagebox.showerror("Error", "Invalid temperature. Please enter a numeric value.")
 
     def location_exists(self, city):
-        """Check if the city already exists in the input CSV."""
+        """
+        Checks if the specified city already exists in the input CSV file.
+        
+        Args:
+            city (str): The name of the city to check.
+            
+        Returns:
+            bool: True if the city already exists, False otherwise.
+        """
         with open(self.recommender.input_path, mode='r', newline='') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
@@ -87,6 +117,10 @@ class RecommendationViewer:
         return False
 
     def load_data(self):
+        """
+        Loads and displays the clothing recommendations from the output CSV file.
+        Updates the Treeview with the latest recommendations, including temperature units.
+        """
         for i in self.tree.get_children():
             self.tree.delete(i)
         with open(self.recommender.output_path, mode='r', newline='') as csvfile:
@@ -99,6 +133,10 @@ class RecommendationViewer:
                 self.tree.insert("", tk.END, values=(location, temperature_with_unit, row['what_to_wear']))
 
     def delete_selected(self):
+        """
+        Deletes the selected recommendation from the input CSV file, recalculates the output, and refreshes the display.
+        Confirms deletion with the user before proceeding.
+        """
         selected_item = self.tree.selection()
         if not selected_item:
             messagebox.showwarning("Warning", "Please select an item to delete.")
@@ -115,6 +153,13 @@ class RecommendationViewer:
             self.load_data()
 
     def update_input_csv(self, location, temperature):
+        """
+        Updates the input CSV file by removing the specified entry.
+        
+        Args:
+            location (str): The location of the entry to remove.
+            temperature (str): The temperature of the entry to remove, used to ensure accurate identification.
+        """
         temp_entries = []
         with open(self.recommender.input_path, mode='r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)

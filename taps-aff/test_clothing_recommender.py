@@ -28,9 +28,10 @@ def test_write_csv(mock_file):
 
 
 # Test for process_csv method
+@patch("builtins.open", new_callable=mock_open, read_data=mock_fahrenheit_cities)
 @patch("clothing_recommender.ClothingRecommender.read_csv")
 @patch("clothing_recommender.ClothingRecommender.write_csv")
-def test_process_csv(mock_write_csv, mock_read_csv):
+def test_process_csv(mock_write_csv, mock_read_csv, mock_open_file):
     mock_read_csv.return_value = [{'location': 'Glasgow', 'temperature': '14'}, {'location': 'Edinburgh', 'temperature': '16'}]
     
     recommender = ClothingRecommender('input.csv', 'output.csv')
@@ -48,4 +49,12 @@ def test_temperature_conversion_and_decision(mock_file):
     temp_in_celsius = recommender.fahrenheit_to_celsius(52)
     assert temp_in_celsius < 15
     assert recommender.decide_what_to_wear(temp_in_celsius) == 'jumper'
+
+@patch("builtins.open", new_callable=mock_open, read_data=mock_fahrenheit_cities)
+def test_using_fahrenheit(mock_fahrenheit_file):
+    recommender = ClothingRecommender('input.csv', 'output.csv')
+    assert recommender.using_fahrenheit('Boston') == True
+    assert recommender.using_fahrenheit('New York') == True
+    assert recommender.using_fahrenheit('London') == False
+    assert recommender.using_fahrenheit('Edinburgh') == False
     
