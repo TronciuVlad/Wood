@@ -2,6 +2,9 @@ import pytest
 from unittest.mock import mock_open, patch
 from clothing_recommender import ClothingRecommender
 
+# Mock data for fahrenheit_cities.txt
+mock_fahrenheit_cities = "Boston\nNew York"
+
 # Test for decide_what_to_wear static method
 def test_decide_what_to_wear():
     assert ClothingRecommender.decide_what_to_wear(14) == 'jumper'
@@ -34,4 +37,15 @@ def test_process_csv(mock_write_csv, mock_read_csv):
     recommender.process_csv()
     
     mock_write_csv.assert_called_once()
+
+
+# Test for correct temperature conversion and decision making
+@patch("builtins.open", new_callable=mock_open, read_data=mock_fahrenheit_cities)
+def test_temperature_conversion_and_decision(mock_file):
+    recommender = ClothingRecommender('input.csv', 'output.csv')
+    assert 'Boston' in recommender.fahrenheit_cities
+    # 52F should convert to a temperature < 15C, leading to a jumper recommendation
+    temp_in_celsius = recommender.fahrenheit_to_celsius(52)
+    assert temp_in_celsius < 15
+    assert recommender.decide_what_to_wear(temp_in_celsius) == 'jumper'
     

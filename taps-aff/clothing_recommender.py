@@ -4,15 +4,26 @@ class ClothingRecommender:
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
+        # List of cities using Fahrenheit
+        with open('fahrenheit_cities.txt', 'r') as file:
+            self.fahrenheit_cities = file.read().splitlines()
 
     @staticmethod
     def decide_what_to_wear(temperature):
         return 'jumper' if temperature < 15 else 't-shirt'
 
+    @staticmethod
+    def fahrenheit_to_celsius(fahrenheit):
+        return (fahrenheit - 32) * 5 / 9
+
     def process_csv(self):
         data = self.read_csv()
         for row in data:
-            row['what_to_wear'] = self.decide_what_to_wear(int(row['temperature']))
+            temperature = int(row['temperature'])
+            # Check if the location is in the list of Fahrenheit cities
+            if row['location'] in self.fahrenheit_cities:
+                temperature = self.fahrenheit_to_celsius(temperature)
+            row['what_to_wear'] = self.decide_what_to_wear(temperature)
         self.write_csv(data)
 
     def read_csv(self):
