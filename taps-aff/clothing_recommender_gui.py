@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from clothing_recommender import ClothingRecommender
 import csv
+import re
 
 class RecommendationViewer:
     """
@@ -146,7 +147,8 @@ class RecommendationViewer:
         confirm = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete the selected item?")
         if confirm:
             location = self.tree.item(selected_item)["values"][0]
-            temperature = self.tree.item(selected_item)["values"][1]
+            temperature_with_unit = self.tree.item(selected_item)["values"][1]
+            temperature = re.match(r"\d+", temperature_with_unit).group()
             self.tree.delete(selected_item)
             self.update_input_csv(location, temperature)
             self.recommender.process_csv()
@@ -166,6 +168,7 @@ class RecommendationViewer:
             for row in reader:
                 if row['location'] != location or str(row['temperature']) != str(temperature):
                     temp_entries.append(row)
+
     
         # Rewrite the input CSV without the deleted entry
         with open(self.recommender.input_path, mode='w', newline='') as csvfile:
